@@ -1,21 +1,63 @@
+puts 'WELCOME TO HANGMAN!'
+puts 'Commands:
+                username = Game.new - Start a new game
+                username.play - Guess a letter
+                username.display_blanks - Show word progress
+                username.turn_count - Show number of turns left
+                username.reset - Start over with a new word
+                username.commands - See list of commands'
+
 class Game
-  attr_reader :name, :letter, :secret_word, :secret_word_options
+  attr_reader :name, :letter, :secret_word, :secret_word_options, :choice
   attr_accessor :wrong_guess, :dictionary, :blanks
 
-  def initialize(name)
-    @name = name
+  def initialize
     @turns = 10
     @wrong_guess = []
     choose_word
   end
 
   def play
-    @letter = gets.chomp.downcase
     create_blanks if @blanks.nil?
+    display_blanks
+    input_prompt
+    @letter = gets.chomp.downcase
     guess_check
     display_blanks
     turn_count
     check_game_over
+  end
+
+  def display_blanks
+    print "#{blanks}\n"
+  end
+
+  def turn_count
+    puts "Turns Left: #{@turns}" if @turns > -1
+  end
+
+  def reset
+    choose_sample
+    @turns = 10
+    @wrong_guess = []
+    @blanks = nil
+    play
+  end
+
+  def commands
+    puts 'Commands:
+                username = Game.new - Start a new game
+                username.play - Guess a word
+                username.display_blanks - Show word progress
+                username.turn_count - Show number of turns left
+                username.reset - Start over with a new word
+                username.commands - See list of commands'
+  end
+
+  private
+
+  def input_prompt
+    puts 'Please Enter a Letter:'
   end
 
   def open_dictionary
@@ -63,33 +105,28 @@ class Game
     secret_word.include?(letter) ? correct_guess : incorrect_guess
   end
 
-  def display_blanks
-    print blanks
-  end
-
-  def turn_count
-    puts "Turns Left: #{@turns}"
+  def lose
+    puts "Game Over! Word was #{secret_word}."
+    try_again
   end
 
   def win
-    puts "Game Over! Word was #{secret_word}."
-    reset
+    puts "Congratulations. You guessed #{secret_word}!"
+    try_again
   end
 
-  def lose
-    puts "Congratulations #{name}. You guessed #{secret_word}!"
-    reset
+  def try_again
+    puts '. . .'
+    puts 'Play Again? (Y/N):'
+    @choice = gets.chomp.downcase
+    reset if choice == 'y'
   end
 
   def check_game_over
-    win if @turns == -1
-    lose if blanks.join('') == secret_word
-  end
-
-  def reset
-    choose_sample
-    @turns = 10
-    @wrong_guess = []
-    @blanks = nil
+    if @turns == -1
+      lose
+    elsif blanks.join('') == secret_word
+      win
+    end
   end
 end
